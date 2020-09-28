@@ -42,6 +42,7 @@ body {
     color: white;
     border: 0;
     padding: 3px 6px;
+    min-width: 190px;
 }
 
 input[type=button] {
@@ -142,6 +143,7 @@ li {
 
 .info input {
     padding: 0 5px;
+    min-width: 190px;
 }
 
 .info input:disabled {
