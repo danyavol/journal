@@ -8,7 +8,7 @@ update(students);
 
 document.getElementById('addButton').addEventListener('click', addStudent);
 document.getElementById('clearRadio').addEventListener('click', (e) => {
-    sendAlert('Вы действительно хотите очистить все пропуски?', 'Очистить', clearRadio, e);
+    sendAlert('Вы действительно хотите очистить все данные о посещаемости?', 'Очистить', clearRadio, e);
 });
 
 document.addEventListener('keydown', (e) => {
