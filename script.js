@@ -20,20 +20,30 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-
-new ClipboardJS('#copyStuds', {
-    text: function() {
-        let total = '1820';
-        for (let i = 0; i < students.length; i++) {
-            if (students[i].value == "ПН") {
-                total += '\n'+students[i].name.split(' ')[0];
-            } else if (students[i].value == "УВ") {
-                total += '\n'+students[i].name.split(' ')[0] + ' ув';
+if (!ClipboardJS.isSupported()) {
+    document.getElementById('#copyStuds').parentNode.style = "display: none";
+} else {
+    let cb = new ClipboardJS('#copyStuds', {
+        text: function() {
+            let total = '1820';
+            for (let i = 0; i < students.length; i++) {
+                if (students[i].value == "ПН") {
+                    total += '\n'+students[i].name.split(' ')[0];
+                } else if (students[i].value == "УВ") {
+                    total += '\n'+students[i].name.split(' ')[0] + ' ув';
+                }
             }
+            return total;
         }
-        return total;
-    }
-});
+    });
+    cb.on('success', () => {
+        alert('Пропуски скопированы в буфер обмена :)');
+    })
+    cb.on('error', () => {
+        alert('Не удалось скопировать данные :(');
+    })
+}
+
 
 function update(array) {
     // Очистка
