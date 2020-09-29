@@ -74,7 +74,7 @@ label {
     padding: 5px 0;
 }
 
-.menu > div:nth-child(2) {
+.menu > div:nth-child(2), div:nth-child(3) {
     align-items: center;
     display: flex;
     justify-content: center;

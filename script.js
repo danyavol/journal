@@ -21,6 +21,20 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+new ClipboardJS('#copyStuds', {
+    text: function() {
+        let total = '1820';
+        for (let i = 0; i < students.length; i++) {
+            if (students[i].value == "ПН") {
+                total += '\n'+students[i].name.split(' ')[0];
+            } else if (students[i].value == "УВ") {
+                total += '\n'+students[i].name.split(' ')[0] + ' ув';
+            }
+        }
+        return total;
+    }
+});
+
 function update(array) {
     // Очистка
     let list = document.getElementById('list');
