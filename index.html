@@ -43,7 +43,7 @@
                 </label>
                 <input type="button" id="clearRadio" value="Очистить пропуски">
             </div>
-            <div>
+            <div style="position: relative">
                 <label for="copyStuds">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="30px" height="30px" viewBox="0 0 699.428 699.428" style="enable-background:new 0 0 699.428 699.428;" xml:space="preserve">
                         <g>
@@ -56,6 +56,10 @@
                     </svg>
                 </label>
                 <input type="button" id="copyStuds" value="Скопировать">
+                <div id="copyDropdown">
+                    <input type="button" id="copyAsText" value="Для деканата">
+                    <input type="button" id="copyForGoogleSheets" value="Для гугл таблицы">
+                </div>
             </div>
         </section>
         <ul id="list"></ul>

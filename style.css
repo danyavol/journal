@@ -94,6 +94,30 @@ label {
     border: 0;
 }
 
+
+#copyDropdown {
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    bottom: -85px;
+    left: 0;
+}
+
+#copyDropdown.show {
+    display: flex;
+}
+
+#copyDropdown input {
+    background: #550055;
+    box-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+    border-radius: 5px;
+    border: 1px solid white;
+    padding: 5px;
+    margin-bottom: 6px;
+}
+
+
 svg {
     fill: lightgrey;
     cursor: pointer;

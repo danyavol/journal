@@ -20,26 +20,56 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
+
+document.getElementById('copyStuds').addEventListener('click', () => {
+    document.getElementById('copyDropdown').classList.toggle('show');
+});
+
 if (!ClipboardJS.isSupported()) {
     document.getElementById('#copyStuds').parentNode.style = "display: none";
 } else {
-    let cb = new ClipboardJS('#copyStuds', {
+    let cb1 = new ClipboardJS('#copyAsText', {
         text: function() {
             let total = '1820';
+            let flag = true;
             for (let i = 0; i < students.length; i++) {
-                if (students[i].value == "ПН") {
+                if (students[i].value === "ПН") {
+                    flag = false;
                     total += '\n'+students[i].name.split(' ')[0];
-                } else if (students[i].value == "УВ") {
+                } else if (students[i].value === "УВ") {
+                    flag = false;
                     total += '\n'+students[i].name.split(' ')[0] + ' ув';
                 }
             }
+            if (flag) total += '\nВсе есть';
             return total;
         }
     });
-    cb.on('success', () => {
-        alert('Пропуски скопированы в буфер обмена :)');
+    cb1.on('success', () => {
+        document.getElementById('copyDropdown').classList.remove('show');
+        // alert('Пропуски скопированы в буфер обмена :)');
     })
-    cb.on('error', () => {
+    cb1.on('error', () => {
+        alert('Не удалось скопировать данные :(');
+    })
+
+    let cb2 = new ClipboardJS('#copyForGoogleSheets', {
+        text: function() {
+            let total = '';
+            for (let i = 0; i < students.length; i++) {
+                if (students[i].value === "ПН") total += 'н\n';
+                else if (students[i].value === "УВ") total += 'у\n';
+                else if (students[i].value === "Есть") total += '.\n';
+                else total += '\n';
+            }
+            return total.slice(0, -1);
+        }
+    });
+    cb2.on('success', () => {
+        document.getElementById('copyDropdown').classList.remove('show');
+        // alert('Пропуски скопированы в буфер обмена :)');
+    })
+    cb2.on('error', () => {
         alert('Не удалось скопировать данные :(');
     })
 }
@@ -115,13 +145,28 @@ function update(array) {
             sendAlert('Вы действительно хотите удалить эту запись?', 'Удалить', del, e);
         });
         newDiv.querySelector('svg[class=save-butt]').addEventListener('click', save);
+
+        newDiv.querySelectorAll('form input').forEach(item => item.addEventListener('click', clearOnDoubleClick ) );
         newDiv.querySelector(`form[name=student${array[i].id}]`).addEventListener('change', change);
+
         document.getElementById('list').appendChild(newDiv);
+
     }
 }
 
 function change(e) {
-    // Изменение radioButton
+    // Изменение стилизации в DOM
+    let pathN = 0;
+    while(e.path[pathN].tagName !== 'LI') pathN++;
+
+    e.path[pathN].classList.remove('yes', 'yv', 'pn', 'null');
+    switch (e.target.id[2]) {
+        case '1': e.path[pathN].classList.add('yes'); break;
+        case '2': e.path[pathN].classList.add('yv'); break;
+        case '3': e.path[pathN].classList.add('pn'); break;
+    }
+
+    // Сохранение изменений в localStorage
     for (let i = 0; i < students.length; i++) {
         if (students[i].id == e.target.id.slice(4)) {
             students[i].value = e.target.value;
@@ -130,7 +175,6 @@ function change(e) {
             break;
         }
     }
-    update(students);
 }
 
 function edit(e) {
@@ -237,4 +281,40 @@ function sendAlert(text='Вы действительно хотите удали
             list.removeChild(list.firstChild);
         }
     }
+}
+
+// Удаление отметки по двойному клику
+let clickStartDate;
+let target;
+function clearOnDoubleClick(e) {
+    if (!clickStartDate) {
+        clickStartDate = true;
+        target = e.target;
+        return setTimeout(() => {clickStartDate = null; target = null}, 250);
+    }
+
+    if (clickStartDate && e.target === target) {
+        clickStartDate = null;
+        target = null;
+
+        // Изменяем стилизацию
+        e.target.checked = false;
+
+        let pathN = 0;
+        while(e.path[pathN].tagName !== 'LI') pathN++;
+        e.path[pathN].classList.remove('yes', 'yv', 'pn');
+        e.path[pathN].classList.add('null');
+
+
+        // Сохранение изменений в localStorage
+        let id = e.target.id.split('-')[1];
+        for (let i = 0; i < students.length; i++) {
+            if (students[i].id == id) {
+                students[i].value = null;
+                localStorage.setItem(`students`, JSON.stringify(students));
+                break;
+            }
+        }
+    }
+
 }
