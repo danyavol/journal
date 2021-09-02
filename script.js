@@ -88,7 +88,7 @@ function update(array) {
         newDiv.classList.add('studItem');
         newDiv.innerHTML = 
         `<div class="info">
-            <div>${array[i].id}</div>
+            <div>${i+1}</div>
             <input type="text" name="student-${array[i].id}" value="${array[i].name}" disabled>
         </div>
         <div class="buttons">
