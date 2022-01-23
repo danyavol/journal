@@ -1,6 +1,9 @@
+
+
+
 let students = JSON.parse(localStorage.getItem('students'));
 if (!students) {
-    students = [{"id":1,"name":"Александрович Илья","value":null},{"id":2,"name":"Аношка Даниил","value":null},{"id":3,"name":"Арико Владислав","value":null},{"id":4,"name":"Бруёк Илья","value":null},{"id":5,"name":"Василенко Богдан","value":null},{"id":6,"name":"Волосюк Даниил","value":null},{"id":7,"name":"Ганисевский Владислав","value":null},{"id":8,"name":"Говша Арсений","value":null},{"id":9,"name":"Голомбевский Андрей","value":null},{"id":10,"name":"Гордынец Илья","value":null},{"id":11,"name":"Жуков Владислав","value":null},{"id":12,"name":"Заводник Владислав","value":null},{"id":13,"name":"Калашников Никита","value":null},{"id":14,"name":"Карач Евгений","value":null},{"id":15,"name":"Китурко Роман","value":null},{"id":16,"name":"Перегуд Дмитрий","value":null},{"id":17,"name":"Прокатень Артем","value":null},{"id":18,"name":"Сахута Данила","value":null},{"id":19,"name":"Сукач Роман","value":null},{"id":20,"name":"Тарас Максим","value":null}];
+    students = DEFAULT_STUDENTS;
     localStorage.setItem('students', JSON.stringify(students));
 }
 
@@ -30,18 +33,17 @@ if (!ClipboardJS.isSupported()) {
 } else {
     let cb1 = new ClipboardJS('#copyAsText', {
         text: function() {
-            let total = '1820';
+            let total = GROUP_NAME;
             let flag = true;
-            for (let i = 0; i < students.length; i++) {
-                if (students[i].value === "ПН") {
+            
+            students.forEach(student => {
+                if (student.value === VALUES.pn || student.value === VALUES.yv) {
                     flag = false;
-                    total += '\n'+students[i].name.split(' ')[0];
-                } else if (students[i].value === "УВ") {
-                    flag = false;
-                    total += '\n'+students[i].name.split(' ')[0] + ' ув';
+                    total += '\n' + student.name.split(' ')[0] + ' ' + VALUES_FOR_DECANAT[student.value];
                 }
-            }
+            });
             if (flag) total += '\nВсе есть';
+
             return total;
         }
     });
@@ -55,14 +57,9 @@ if (!ClipboardJS.isSupported()) {
 
     let cb2 = new ClipboardJS('#copyForGoogleSheets', {
         text: function() {
-            let total = '';
-            for (let i = 0; i < students.length; i++) {
-                if (students[i].value === "ПН") total += 'н\n';
-                else if (students[i].value === "УВ") total += 'у\n';
-                else if (students[i].value === "Есть") total += '.\n';
-                else total += '\n';
-            }
-            return total.slice(0, -1);
+            return students
+                .map(student => VALUES_FOR_JOURNAL[student.value])
+                .join(GOOGLE_SHEETS_SEPARATOR);
         }
     });
     cb2.on('success', () => {
@@ -75,32 +72,37 @@ if (!ClipboardJS.isSupported()) {
 }
 
 
-function update(array) {
+function update(students) {
+    const list = document.getElementById('list');
+
     // Очистка
-    let list = document.getElementById('list');
     while(list.firstChild) {
         list.removeChild(list.firstChild);
     }
 
-
-    for(let i = 0; i < array.length; i++) {
-        let newDiv = document.createElement('li');
-        newDiv.classList.add('studItem');
-        newDiv.innerHTML = 
+    students.forEach((student, index) => {
+        const studentElement = document.createElement('li');
+        studentElement.classList.add('studItem');
+        studentElement.innerHTML = 
         `<div class="info">
-            <div>${i+1}</div>
-            <input type="text" name="student-${array[i].id}" value="${array[i].name}" disabled>
+            <div>${index+1}</div>
+            <input type="text" name="student-${student.id}" value="${student.name}" disabled>
         </div>
         <div class="buttons">
-            <form name="student${array[i].id}">
-                <input type="radio" name="status${array[i].id}" id="rb1-${array[i].id}" value="Есть" ${array[i].value == "Есть" ? 'checked':''}>
-                <label for="rb1-${array[i].id}">Есть</label>
-                <input type="radio" name="status${array[i].id}" id="rb2-${array[i].id}" value="УВ" ${array[i].value == "УВ" ? 'checked':''}>
-                <label for="rb2-${array[i].id}">УВ</label>
-                <input type="radio" name="status${array[i].id}" id="rb3-${array[i].id}" value="ПН"${array[i].value == "ПН" ? 'checked':''}>
-                <label for="rb3-${array[i].id}">ПН</label>
+            <form name="student${student.id}">
+                <input type="radio" name="status${student.id}" id="rb1-${student.id}" 
+                    value="${VALUES.yes}" ${student.value === VALUES.yes ? 'checked':''}>
+                <label for="rb1-${student.id}">${VALUES_NAMES[VALUES.yes]}</label>
+
+                <input type="radio" name="status${student.id}" id="rb2-${student.id}" 
+                    value="${VALUES.yv}" ${student.value === VALUES.yv ? 'checked':''}>
+                <label for="rb2-${student.id}">${VALUES_NAMES[VALUES.yv]}</label>
+
+                <input type="radio" name="status${student.id}" id="rb3-${student.id}" 
+                    value="${VALUES.pn}" ${student.value === VALUES.pn ? 'checked':''}>
+                <label for="rb3-${student.id}">${VALUES_NAMES[VALUES.pn]}</label>
             </form>
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" uId="${array[i].id}" class="save-butt" width="20px" height="20px" viewBox="0 0 612 612" style="display: none" xml:space="preserve">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" uId="${student.id}" class="save-butt" width="20px" height="20px" viewBox="0 0 612 612" style="display: none" xml:space="preserve">
                 <g>
                     <g id="_x32__13_">
                         <g>
@@ -109,7 +111,7 @@ function update(array) {
                     </g>
                 </g>
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" uId="${array[i].id}" class="edit-butt" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 612 612" xml:space="preserve">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" uId="${student.id}" class="edit-butt" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 612 612" xml:space="preserve">
                 <g>
                     <g id="_x39__36_">
                         <g>
@@ -118,7 +120,7 @@ function update(array) {
                     </g>
                 </g>
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" uId="${array[i].id}" class="del-butt" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 753.23 753.23" xml:space="preserve">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" uId="${student.id}" class="del-butt" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 753.23 753.23" xml:space="preserve">
                 <g>
                     <g id="_x34__19_">
                         <g>
@@ -128,48 +130,37 @@ function update(array) {
                 </g>
             </svg>
         </div>`;
-        switch(array[i].value) {
-            case null:
-                newDiv.classList.add('null'); break;
-            case 'УВ':
-                newDiv.classList.add('yv'); break;
-            case 'ПН':
-                newDiv.classList.add('pn'); break;
-            case 'Есть':
-                newDiv.classList.add('yes'); break;
-            default:
-                newDiv.classList.add('null');
-        }
-        newDiv.querySelector('svg[class=edit-butt]').addEventListener('click', edit);
-        newDiv.querySelector('svg[class=del-butt]').addEventListener('click', (e) => {
+
+        studentElement.classList.add(VALUES_CLASSES[student.value]);
+
+        studentElement.querySelector('svg[class=edit-butt]').addEventListener('click', edit);
+        studentElement.querySelector('svg[class=del-butt]').addEventListener('click', (e) => {
             sendAlert('Вы действительно хотите удалить эту запись?', 'Удалить', del, e);
         });
-        newDiv.querySelector('svg[class=save-butt]').addEventListener('click', save);
+        studentElement.querySelector('svg[class=save-butt]').addEventListener('click', save);
 
-        newDiv.querySelectorAll('form input').forEach(item => item.addEventListener('click', clearOnDoubleClick ) );
-        newDiv.querySelector(`form[name=student${array[i].id}]`).addEventListener('change', change);
+        studentElement.querySelectorAll('form input').forEach(item => item.addEventListener('click', clearOnDoubleClick ) );
+        studentElement.querySelector(`form[name=student${student.id}]`).addEventListener('change', change);
 
-        document.getElementById('list').appendChild(newDiv);
-
-    }
+        list.appendChild(studentElement);
+    });
 }
 
 function change(e) {
     // Изменение стилизации в DOM
     let pathN = 0;
     while(e.path[pathN].tagName !== 'LI') pathN++;
+    const studentElement = e.path[pathN];
+    const studentId = e.target.id.slice(4);
+    const selectedValue = e.target.value;
 
-    e.path[pathN].classList.remove('yes', 'yv', 'pn', 'null');
-    switch (e.target.id[2]) {
-        case '1': e.path[pathN].classList.add('yes'); break;
-        case '2': e.path[pathN].classList.add('yv'); break;
-        case '3': e.path[pathN].classList.add('pn'); break;
-    }
+    studentElement.classList.remove(...ALL_CLASSES);
+    studentElement.classList.add(VALUES_CLASSES[selectedValue]);
 
     // Сохранение изменений в localStorage
     for (let i = 0; i < students.length; i++) {
-        if (students[i].id == e.target.id.slice(4)) {
-            students[i].value = e.target.value;
+        if (students[i].id == studentId) {
+            students[i].value = selectedValue;
 
             localStorage.setItem(`students`, JSON.stringify(students));
             break;
@@ -302,15 +293,16 @@ function clearOnDoubleClick(e) {
 
         let pathN = 0;
         while(e.path[pathN].tagName !== 'LI') pathN++;
-        e.path[pathN].classList.remove('yes', 'yv', 'pn');
-        e.path[pathN].classList.add('null');
-
+        const studentElement = e.path[pathN];
+        
+        studentElement.classList.remove(...ALL_CLASSES);
+        studentElement.classList.add(VALUES_CLASSES[VALUES.null]);
 
         // Сохранение изменений в localStorage
         let id = e.target.id.split('-')[1];
         for (let i = 0; i < students.length; i++) {
             if (students[i].id == id) {
-                students[i].value = null;
+                students[i].value = VALUES.null;
                 localStorage.setItem(`students`, JSON.stringify(students));
                 break;
             }
